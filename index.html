@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editor de Archivos y Consola</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="frontend/styles.css">
 </head>
 <body>
     <div class="container">
@@ -13,6 +13,7 @@
             <button id="createFileBtn">Crear Archivo</button>
             <input type="file" id="fileInput">
             <button id="executeBtn">Ejecutar</button>
+            <p id="salida"></p>
             <pre id="ast"></pre>
             <button id="generateReportBtn">Generar Reporte</button>
         </div>
@@ -21,6 +22,6 @@
         <textarea id="console" readonly></textarea>
     </div>
 
-    <script type="module" src=".\script.js"></script>
+    <script type="module" src="frontend/script.js"></script>
 </body>
 </html>
