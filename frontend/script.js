@@ -31,41 +31,57 @@ function loadFile(event) {
 function executeText() {
     const textAreas = document.querySelectorAll('#textAreasContainer textarea');
     const consoleOutput = document.getElementById('console');
-    consoleOutput.value = ''; // Clear console
-    
+    const errorConsole = document.getElementById('errorConsole'); // Consola de errores
+    consoleOutput.value = ''; // Limpiar consola
+    errorConsole.value = ''; // Limpiar consola de errores
+
     textAreas.forEach((textarea, index) => {
         const content = textarea.value;
-        try{
-            const expresion =parse(content)
-            const interprete = new InterpreterVisitor()
-            console.log({expresion})
-            expresion.forEach(expresion =>expresion.accept(interprete))
-          //  salida.innerHTML = interprete.salida
-           consoleOutput.value += `Ejecutando archivo ${index + 1}:\n${interprete.salida}\n`;
+        try {
+            const expresion = parse(content);
+            const interprete = new InterpreterVisitor();
+            console.log({ expresion });
+            expresion.forEach(expresion => expresion.accept(interprete));
+            consoleOutput.value += `Ejecutando archivo ${index + 1}:\n${interprete.salida}\n`;
+        } catch (error) {
+            console.log(error);
+            if (error.location && error.location.start) {
+                const errorMessage = `${error.message} at line ${error.location.start.line} column ${error.location.start.column}`;
+                errorConsole.value += `Error en archivo ${index + 1}:\n${errorMessage}\n\n`;
+            } else {
+                // Muestra el mensaje de error genérico si no hay información de ubicación
+                errorConsole.value += `Error en archivo ${index + 1}: ${error.message}\n\n`;
+            }
         }
-        catch (error) {
-            console.log(error)
-            // console.log(JSON.stringify(error, null, 2))
-           // salida.innerHTML = error.message + ' at line ' + error.location.start.line + ' column ' + error.location.start.column
-        
-        }
-
-       
-        //ast.innerHTML =JSON.stringify(arbol,null,2)
-        //console.log({ sentencias })
-  
-
     });
 }
+
 
 function generateReport() {
     const textAreas = document.querySelectorAll('#textAreasContainer textarea');
-    const consoleOutput = document.getElementById('console');
+    const reportConsole = document.getElementById('reportConsole'); // Nueva consola para reportes
     let report = `Report generated on ${new Date().toLocaleString()}:\n\n`;
 
     textAreas.forEach((textarea, index) => {
-        report += `Archivo ${index + 1}:\n${textarea.value}\n\n`;
+        const content = textarea.value;
+        try {
+            const expresion = parse(content);
+            const interprete = new InterpreterVisitor();
+
+            // Ejecutar las expresiones para llenar el reporte
+            expresion.forEach(expresion => expresion.accept(interprete));
+
+            report += `Archivo ${index + 1}:\n`;
+            interprete.report.forEach(item => {
+                report += `Entorno: ${item.entorno}, Nombre: ${item.nombre}, Tipo: ${item.tipo}, Valor: ${item.valor}\n`;
+            });
+            report += `\n`;
+        } catch (error) {
+            report += `Error en archivo ${index + 1}: ${error.message}\n\n`;
+        }
     });
 
-    consoleOutput.value = report;
+    reportConsole.value = report; // Mostrar el reporte en la nueva consola
 }
+
+

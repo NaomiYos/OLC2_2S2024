@@ -4,7 +4,87 @@ import nodos, { Expresion } from './nodos.js'
 import { BreakException, ContinueException, ReturnException } from "./transferencia.js";
 import { Invocable } from "./invocable.js";
 import { embebidas } from "./embebidas.js";
+import { Clase } from "./clase.js";
+import { Instancia } from "./instancia.js";
+import { FuncionForanea } from "./foranea.js";
+let matrixSuma = [
+    ['     ', 'float', 'int', 'string'],
+    ['float', true, true, false],
+    ['int', true, true, false],
+    ['string', false, false, true],
+];
 
+let matrixBasicOperation = [
+    ['     ', 'float', 'int'],
+    ['float', true, true],
+    ['int', true, true],
+];
+
+let matrixModulo = [
+    ['     ', 'int'],
+    ['int', true],
+];
+
+let matrixLogic = [
+    ['     ', 'boolean'],
+    ['boolean', true],
+];
+
+let matrixRelacional = [
+    ['     ', 'int', 'float', 'char'],
+    ['int', true, true, false],
+    ['float', true, true, false],
+    ['char', false, false, true],
+];
+
+let matrixComparacion = [
+    ['     ', 'int', 'float', 'char', 'string', 'boolean'],
+    ['int', true, true, false,  false, false],
+    ['float', true, true, false, false, false],
+    ['char', false, false, true, false, false],
+    ['string', false, false, false, true, false],
+    ['boolean', false, false, false, false, true],
+];
+
+let matrixBasicOperationResult = [
+    ['     ', 'float', 'int', 'string'],
+    ['float', 'float', 'float', false],
+    ['int', 'float', 'int', false],
+    ['string', false, false, 'string'],
+];
+function checkMatrix(type1, type2, matrix, matrix2) {
+
+    let rowIndex = matrix.findIndex(row => row[0] === type1);
+    let colIndex = matrix[0].findIndex(col => col === type2);
+
+    let rowIndexType = matrix2.findIndex(row => row[0] === type1);
+    let colIndexType = matrix2[0].findIndex(col => col === type2);
+
+    if (rowIndex !== -1 && colIndex !== -1) {
+        return {validar: matrix[rowIndex][colIndex], tipo: matrix2[rowIndexType][colIndexType]};
+    }
+    return {validar: false, tipo: 'null'};
+}
+
+function checkMatrixLogic(type1, type2, matrix) {
+
+    let rowIndex = matrix.findIndex(row => row[0] === type1);
+    let colIndex = matrix[0].findIndex(col => col === type2);
+
+
+    if (rowIndex !== -1 && colIndex !== -1) {
+        return {validar: matrix[rowIndex][colIndex]};
+    }
+    return {validar: false};
+}
+
+function zeroValue(node){
+    if(node.valor === 0){
+        console.warn('No se puede realizar la operacion entre 0');
+         return true;
+    }
+    return false;
+}
 
 export class InterpreterVisitor extends BaseVisitor {
 
@@ -15,55 +95,142 @@ export class InterpreterVisitor extends BaseVisitor {
 
 
         this.salida = '';
+        this.report = [];
 
         /**
          * @type {Expresion | null}
         */
         this.prevContinue = null;
     }
+    agregarReporte(entorno, nombre, tipo, valor) {
+        this.report.push({ entorno: entorno.id, nombre, tipo, valor });
+    }
 
     interpretar(nodo) {
         return nodo.accept(this);
     }
+    
 
     /**
       * @type {BaseVisitor['visitOperacionBinaria']}
       */
     visitOperacionBinaria(node) {
-        const izq = node.izq.accept(this);
-        const der = node.der.accept(this);
-
+        let izq = node.izq.accept(this);
+        let der = node.der.accept(this);
+        let x;
         switch (node.op) {
             case '+':
-                return izq + der;
+                x = checkMatrix(izq.tipo, der.tipo, matrixSuma, matrixBasicOperationResult);
+                if(x.validar){ return {valor:izq.valor + der.valor, tipo: x.tipo}
+            }else{
+                return {valor: null , tipo: 'null'}
+            }
+               
             case '-':
-                return izq - der;
+                x = checkMatrix(izq.tipo, der.tipo, matrixBasicOperation, matrixBasicOperationResult);
+                if(x.validar) return {valor:izq.valor - der.valor, tipo: x.tipo};
+                return {valor: null , tipo: 'null'}
+           
             case '*':
-                return izq * der;
+                x = checkMatrix(izq.tipo, der.tipo, matrixBasicOperation, matrixBasicOperationResult);
+                if(x.validar) return {valor:izq.valor * der.valor, tipo: x.tipo};
+                return {valor: null , tipo: 'null'}
             case '/':
-                return izq / der;
+                if(zeroValue(der)) return {valor: null, tipo: 'null'};
+                x = checkMatrix(izq.tipo, der.tipo, matrixBasicOperation, matrixBasicOperationResult);
+                if(x.validar) return {valor:izq.valor / der.valor, tipo: x.tipo};
+                return {valor: null , tipo: 'null'}
+            case '%':
+                if(zeroValue(der)) return {valor: null, tipo: 'null'};
+                x = checkMatrix(izq.tipo, der.tipo, matrixModulo, matrixBasicOperationResult);
+                if(x.validar) return {valor:izq.valor % der.valor, tipo: x.tipo};
+                return {valor: null , tipo: 'null'}
+            case '<':
+                x = checkMatrixLogic(izq.tipo, der.tipo, matrixRelacional);
+                if(x.validar) return {valor:izq.valor < der.valor, tipo: 'boolean'};
+                return {valor: null , tipo: 'null'}
+            case '>':
+                x = checkMatrixLogic(izq.tipo, der.tipo, matrixRelacional);
+                if(x.validar) return {valor:izq.valor > der.valor, tipo: 'boolean'};
+                return {valor: null , tipo: 'null'}
             case '<=':
-                return izq <= der;
+                x = checkMatrixLogic(izq.tipo, der.tipo, matrixRelacional);
+                if(x.validar) return {valor:izq.valor <= der.valor, tipo: 'boolean'};
+                return {valor: null , tipo: 'null'}
+            case '>=':
+                x = checkMatrixLogic(izq.tipo, der.tipo, matrixRelacional);
+                if(x.validar) return {valor:izq.valor >= der.valor, tipo: 'boolean'};
+                return {valor: null , tipo: 'null'}
             case '==':
-                return izq === der;
+                x = checkMatrixLogic(izq.tipo, der.tipo, matrixComparacion);
+                if(x.validar) return {valor:izq.valor === der.valor, tipo: 'boolean'};
+                return {valor: null , tipo: 'null'}
+            case '!=':
+                x = checkMatrixLogic(izq.tipo, der.tipo, matrixComparacion);
+                if(x.validar) return {valor:izq.valor !== der.valor, tipo: 'boolean'};
+                return {valor: null , tipo: 'null'}
+            case '&&':
+                x = checkMatrixLogic(izq.tipo, der.tipo, matrixLogic);
+                if(x.validar) return {valor:izq.valor && der.valor, tipo: 'boolean'};
+                return {valor: null , tipo: 'null'}
+            case '||':
+                x = checkMatrixLogic(izq.tipo, der.tipo, matrixLogic);
+                console.log(izq || der, "logica");
+                if(x.validar) return {valor:izq.valor || der.valor, tipo: 'boolean'};
+                return {valor: null , tipo: 'null'}
             default:
-                throw new Error(`Operador no soportado: ${node.op}`);
+                throw new ErrorSyntax('Operador no soportado', node.location);
         }
+
     }
+    
 
     /**
       * @type {BaseVisitor['visitOperacionUnaria']}
       */
     visitOperacionUnaria(node) {
         const exp = node.exp.accept(this);
-
+    
         switch (node.op) {
             case '-':
-                return -exp;
+                if (exp.tipo !== 'int' && exp.tipo !== 'float') {
+                    throw new Error(`Operador '-' no soportado para el tipo: ${exp.tipo}`);
+                }
+                return { valor: -exp.valor, tipo: exp.tipo };
             default:
                 throw new Error(`Operador no soportado: ${node.op}`);
         }
     }
+    /**
+      * @type {BaseVisitor['visitTernario']}
+      */
+    visitTernario(node){
+        const cond = node.condicion.accept(this);
+        const exp1 = node.exprTrue.accept(this);
+        const exp2 = node.exprFalse.accept(this);
+        if(cond.valor){
+            return exp1;
+            }
+            else{
+                return exp2;
+            }
+
+    }
+    visitincrementoDecremento(node){
+        const exp = this.entornoActual.getVariable(node.id);
+        const valor = node.n2.accept(this);
+
+        
+        switch (node.op) {
+            case '+=':
+               this.entornoActual.assignVariable(node.id,{tipo:exp.tipo,valor:exp.valor+valor.valor})
+               break;
+            case '-=':
+                this.entornoActual.assignVariable(node.id,{tipo:exp.tipo,valor:exp.valor-valor.valor})
+                break;
+        }
+    }
+    
 
     /**
       * @type {BaseVisitor['visitAgrupacion']}
@@ -85,52 +252,48 @@ export class InterpreterVisitor extends BaseVisitor {
      */
     visitDeclaracionVariable(node) {
         const nombreVariable = node.id;
-        const valorVariable = node.exp.accept(this);
+        let valorVariable = node.exp ? node.exp.accept(this) : { valor: null, tipo: 'null' };
         let tipo = node.tipo;
     
-        // Verificación del tipo
-
-
+        // Verificación del tipo y asignación de null si el tipo no coincide
         switch (tipo) {
             case 'int':
-                if ( valorVariable.tipo !== 'int' ) {
-                    throw new Error(`La variable ${nombreVariable} debe ser de tipo int`);
+                if (valorVariable.tipo !== 'int') {
+                    valorVariable = { valor: null, tipo: 'null' };
                 }
                 break;
             case 'float':
-                if (valorVariable.tipo !== 'float'|| valorVariable.tipo !=="int" ) {
-                    throw new Error(`La variable ${nombreVariable} debe ser de tipo float`);
+                if (valorVariable.tipo !== 'float' && valorVariable.tipo !== 'int') {
+                    valorVariable = { valor: null, tipo: 'null' };
                 }
                 break;
             case 'string':
-                if ( valorVariable.tipo !== 'string') {
-                    throw new Error(`La variable ${nombreVariable} debe ser de tipo string`);
+                if (valorVariable.tipo !== 'string') {
+                    valorVariable = { valor: null, tipo: 'null' };
                 }
                 break;
             case 'boolean':
-                if ( valorVariable.tipo !== 'boolean') {
-                    throw new Error(`La variable ${nombreVariable} debe ser de tipo boolean`);
+                if (valorVariable.tipo !== 'boolean') {
+                    valorVariable = { valor: null, tipo: 'null' };
                 }
                 break;
             case 'char':
-                if ( valorVariable.tipo !== 'char') {
-                    throw new Error(`La variable ${nombreVariable} debe ser de tipo char`);
+                if (valorVariable.tipo !== 'char') {
+                    valorVariable = { valor: null, tipo: 'null' };
                 }
-            
                 break;
             case 'var':
-               {
-                tipo=valorVariable.tipo
-                    
-                }
+                tipo = valorVariable.tipo; // Asigna el tipo dinámicamente
                 break;
-            
             default:
                 throw new Error(`Tipo desconocido: ${tipo}`);
         }
     
+        // Asignar la variable en el entorno
         this.entornoActual.setVariable(nombreVariable, tipo, valorVariable.valor);
+        this.agregarReporte(this.entornoActual, nombreVariable, tipo, valorVariable.valor);
     }
+    
     
 
 
@@ -150,6 +313,11 @@ export class InterpreterVisitor extends BaseVisitor {
         const valor = node.exp.accept(this);
         this.salida += valor.valor + '\n';
     }
+    
+    
+    
+    
+    
 
 
     /**
@@ -188,16 +356,12 @@ export class InterpreterVisitor extends BaseVisitor {
      */
     visitIf(node) {
         const cond = node.cond.accept(this);
-
-        if (cond) {
+    
+        if (cond.valor) {  // Asegúrate de acceder a 'valor'
             node.stmtTrue.accept(this);
-            return;
-        }
-
-        if (node.stmtFalse) {
+        } else if (node.stmtFalse) {
             node.stmtFalse.accept(this);
         }
-
     }
 
     /**
@@ -205,36 +369,37 @@ export class InterpreterVisitor extends BaseVisitor {
      */
     visitWhile(node) {
         const entornoConElQueEmpezo = this.entornoActual;
-
+    
         try {
-            while (node.cond.accept(this)) {
-                node.stmt.accept(this);
+            while (node.cond.accept(this).valor) {
+                try {
+                    node.stmt.accept(this);
+                } catch (error) {
+                    if (error instanceof BreakException) {
+                        break;  // Salir del bucle si se lanza Break
+                    }
+    
+                    if (error instanceof ContinueException) {
+                        continue;  // Pasar a la siguiente iteración si se lanza Continue
+                    }
+    
+                    throw error;  // Volver a lanzar cualquier otro tipo de error
+                }
             }
-        } catch (error) {
-            this.entornoActual = entornoConElQueEmpezo;
-
-            if (error instanceof BreakException) {
-                console.log('break');
-                return
-            }
-
-            if (error instanceof ContinueException) {
-                return this.visitWhile(node);
-            }
-
-            throw error;
-
+        } finally {
+            this.entornoActual = entornoConElQueEmpezo;  // Restaurar el entorno original
         }
     }
+    
+    
 
     /**
      * @type {BaseVisitor['visitFor']}
      */
     visitFor(node) {
-        // this.prevContinue = node.inc;
         const incrementoAnterior = this.prevContinue;
         this.prevContinue = node.inc;
-
+    
         const forTraducido = new nodos.Bloque({
             dcls: [
                 node.init,
@@ -248,13 +413,24 @@ export class InterpreterVisitor extends BaseVisitor {
                     })
                 })
             ]
-        })
-
-        forTraducido.accept(this);
-
-        this.prevContinue = incrementoAnterior;
+        });
+    
+        try {
+            forTraducido.accept(this);
+        } catch (error) {
+            if (error instanceof BreakException) {
+                // Romper el bucle en caso de Break
+            } else if (error instanceof ContinueException) {
+                // Continuar a la siguiente iteración en caso de Continue
+                this.prevContinue.accept(this);  // Ejecutar el incremento del bucle
+            } else {
+                throw error;  // Lanzar otros errores
+            }
+        } finally {
+            this.prevContinue = incrementoAnterior;  // Restaurar el incremento anterior
+        }
     }
-
+    
     /**
      * @type {BaseVisitor['visitBreak']}
      */
@@ -288,9 +464,10 @@ export class InterpreterVisitor extends BaseVisitor {
     /**
     * @type {BaseVisitor['visitLlamada']}
     */
-    visitLlamada(node) {
-        const funcion = node.callee.accept(this);
-
+    /*visitLlamada(node) {
+       
+        const funcion = node.callee.accept(this).valor;
+      
         const argumentos = node.args.map(arg => arg.accept(this));
 
         if (!(funcion instanceof Invocable)) {
@@ -298,11 +475,120 @@ export class InterpreterVisitor extends BaseVisitor {
             // 1() "sdalsk"()
         }
 
-        if (funcion.aridad() !== argumentos.length) {
+        if (funcion.aridad()!== argumentos.length) {
             throw new Error('Aridad incorrecta');
         }
 
         return funcion.invocar(this, argumentos);
+    }*/
+        visitLlamada(node) {
+            const funcionVariable = node.callee.accept(this);  // Recibe el objeto completo de la variable
+            const funcion = funcionVariable.valor;  // Accede al valor que debería ser la función
+        
+            const argumentos = node.args.map(arg => arg.accept(this));
+        
+            if (!(funcion instanceof Invocable)) {
+                throw new Error('No es invocable');
+            }
+        
+            if (funcion.aridad() !== argumentos.length) {
+                throw new Error('Aridad incorrecta');
+            }
+        
+            return funcion.invocar(this, argumentos);
+        }
+        
+
+    /**
+    * @type {BaseVisitor['visitFuncDcl']}
+    */
+   /* visitFuncDcl(node) {
+        const funcion = new FuncionForanea(node, this.entornoActual);
+        this.entornoActual.setVariable(node.id, {valor:funcion, tipo:"funcion"});
+        this.agregarReporte(this.entornoActual, node.id, "funcion", "n/a");
+    }*/
+        visitFuncDcl(node) {
+            const funcion = new FuncionForanea(node, this.entornoActual);
+            this.entornoActual.setVariable(node.id, "funcion", funcion);
+            this.agregarReporte(this.entornoActual, node.id, "funcion", "n/a");
+        }
+        
+
+
+    /**
+    * @type {BaseVisitor['visitClassDcl']}
+    */
+    visitClassDcl(node) {
+
+        const metodos = {}
+        const propiedades = {}
+
+        node.dcls.forEach(dcl => {
+            if (dcl instanceof nodos.FuncDcl) {
+                metodos[dcl.id] = new FuncionForanea(dcl, this.entornoActual);
+            } else if (dcl instanceof nodos.DeclaracionVariable) {
+                propiedades[dcl.id] = dcl.exp
+            }
+        });
+
+        const clase = new Clase(node.id, propiedades, metodos);
+
+        this.entornoActual.setVariable(node.id, clase);
+
+    }
+
+    /**
+    * @type {BaseVisitor['visitInstancia']}
+    */
+    visitInstancia(node) {
+
+        const clase = this.entornoActual.getVariable(node.id);
+
+        const argumentos = node.args.map(arg => arg.accept(this));
+
+
+        if (!(clase instanceof Clase)) {
+            throw new Error('No es posible instanciar algo que no es una clase');
+        }
+
+
+
+        return clase.invocar(this, argumentos);
+    }
+
+
+    /**
+    * @type {BaseVisitor['visitGet']}
+    */
+    visitGet(node) {
+
+        // var a = new Clase();
+        // a.propiedad
+        const instancia = node.objetivo.accept(this);
+
+        if (!(instancia instanceof Instancia)) {
+            console.log(instancia);
+            throw new Error('No es posible obtener una propiedad de algo que no es una instancia');
+        }
+
+        return instancia.getVariable(node.propiedad);
+    }
+
+    /**
+    * @type {BaseVisitor['visitSet']}
+    */
+    visitSet(node) {
+        const instancia = node.objetivo.accept(this);
+
+        if (!(instancia instanceof Instancia)) {
+            throw new Error('No es posible asignar una propiedad de algo que no es una instancia');
+        }
+
+        const valor = node.valor.accept(this);
+
+        instancia.setVariable(node.propiedad, valor);
+
+        return valor;
     }
 
 }

@@ -566,4 +566,267 @@ export class Llamada extends Expresion {
     }
 }
     
-export default { Expresion, OperacionBinaria, OperacionUnaria, Agrupacion, Numero, DeclaracionVariable, ReferenciaVariable, Print, ExpresionStmt, Asignacion, Bloque, If, While, For, Break, Continue, Return, Llamada }
+export class FuncDcl extends Expresion {
+
+    /**
+    * @param {Object} options
+    * @param {string} options.id Identificador de la funcion
+ * @param {string[]} options.params Parametros de la funcion
+ * @param {Bloque} options.bloque Cuerpo de la funcion
+    */
+    constructor({ id, params, bloque }) {
+        super();
+        
+        /**
+         * Identificador de la funcion
+         * @type {string}
+        */
+        this.id = id;
+
+
+        /**
+         * Parametros de la funcion
+         * @type {string[]}
+        */
+        this.params = params;
+
+
+        /**
+         * Cuerpo de la funcion
+         * @type {Bloque}
+        */
+        this.bloque = bloque;
+
+    }
+
+    /**
+     * @param {BaseVisitor} visitor
+     */
+    accept(visitor) {
+        return visitor.visitFuncDcl(this);
+    }
+}
+    
+export class ClassDcl extends Expresion {
+
+    /**
+    * @param {Object} options
+    * @param {string} options.id Identificador de la clase
+ * @param {Expresion[]} options.dcls Declaraciones de la clase
+    */
+    constructor({ id, dcls }) {
+        super();
+        
+        /**
+         * Identificador de la clase
+         * @type {string}
+        */
+        this.id = id;
+
+
+        /**
+         * Declaraciones de la clase
+         * @type {Expresion[]}
+        */
+        this.dcls = dcls;
+
+    }
+
+    /**
+     * @param {BaseVisitor} visitor
+     */
+    accept(visitor) {
+        return visitor.visitClassDcl(this);
+    }
+}
+    
+export class Instancia extends Expresion {
+
+    /**
+    * @param {Object} options
+    * @param {string} options.id Identificador de la clase
+ * @param {Expresion[]} options.args Argumentos de la instancia
+    */
+    constructor({ id, args }) {
+        super();
+        
+        /**
+         * Identificador de la clase
+         * @type {string}
+        */
+        this.id = id;
+
+
+        /**
+         * Argumentos de la instancia
+         * @type {Expresion[]}
+        */
+        this.args = args;
+
+    }
+
+    /**
+     * @param {BaseVisitor} visitor
+     */
+    accept(visitor) {
+        return visitor.visitInstancia(this);
+    }
+}
+    
+export class Get extends Expresion {
+
+    /**
+    * @param {Object} options
+    * @param {Expresion} options.objetivo Objeto de la propiedad
+ * @param {string} options.propiedad Identificador de la propiedad
+    */
+    constructor({ objetivo, propiedad }) {
+        super();
+        
+        /**
+         * Objeto de la propiedad
+         * @type {Expresion}
+        */
+        this.objetivo = objetivo;
+
+
+        /**
+         * Identificador de la propiedad
+         * @type {string}
+        */
+        this.propiedad = propiedad;
+
+    }
+
+    /**
+     * @param {BaseVisitor} visitor
+     */
+    accept(visitor) {
+        return visitor.visitGet(this);
+    }
+}
+    
+export class Set extends Expresion {
+
+    /**
+    * @param {Object} options
+    * @param {Expresion} options.objetivo Objeto de la propiedad
+ * @param {string} options.propiedad Identificador de la propiedad
+ * @param {Expresion} options.valor Valor de la propiedad
+    */
+    constructor({ objetivo, propiedad, valor }) {
+        super();
+        
+        /**
+         * Objeto de la propiedad
+         * @type {Expresion}
+        */
+        this.objetivo = objetivo;
+
+
+        /**
+         * Identificador de la propiedad
+         * @type {string}
+        */
+        this.propiedad = propiedad;
+
+
+        /**
+         * Valor de la propiedad
+         * @type {Expresion}
+        */
+        this.valor = valor;
+
+    }
+
+    /**
+     * @param {BaseVisitor} visitor
+     */
+    accept(visitor) {
+        return visitor.visitSet(this);
+    }
+}
+    
+export class incrementoDecremento extends Expresion {
+
+    /**
+    * @param {Object} options
+    * @param {Expresion} options.id Expresion de la operacion
+ * @param {string} options.op Operador de la operacion
+ * @param {Expresion} options.n2 Operador de la operacion
+    */
+    constructor({ id, op, n2 }) {
+        super();
+        
+        /**
+         * Expresion de la operacion
+         * @type {Expresion}
+        */
+        this.id = id;
+
+
+        /**
+         * Operador de la operacion
+         * @type {string}
+        */
+        this.op = op;
+
+
+        /**
+         * Operador de la operacion
+         * @type {Expresion}
+        */
+        this.n2 = n2;
+
+    }
+
+    /**
+     * @param {BaseVisitor} visitor
+     */
+    accept(visitor) {
+        return visitor.visitincrementoDecremento(this);
+    }
+}
+    
+export class Ternario extends Expresion {
+
+    /**
+    * @param {Object} options
+    * @param {Expresion} options.condicion Expresion de la operacion
+ * @param {Expresion} options.exprTrue Expresion 1
+ * @param {Expresion} options.exprFalse Expresion 2
+    */
+    constructor({ condicion, exprTrue, exprFalse }) {
+        super();
+        
+        /**
+         * Expresion de la operacion
+         * @type {Expresion}
+        */
+        this.condicion = condicion;
+
+
+        /**
+         * Expresion 1
+         * @type {Expresion}
+        */
+        this.exprTrue = exprTrue;
+
+
+        /**
+         * Expresion 2
+         * @type {Expresion}
+        */
+        this.exprFalse = exprFalse;
+
+    }
+
+    /**
+     * @param {BaseVisitor} visitor
+     */
+    accept(visitor) {
+        return visitor.visitTernario(this);
+    }
+}
+    
+export default { Expresion, OperacionBinaria, OperacionUnaria, Agrupacion, Numero, DeclaracionVariable, ReferenciaVariable, Print, ExpresionStmt, Asignacion, Bloque, If, While, For, Break, Continue, Return, Llamada, FuncDcl, ClassDcl, Instancia, Get, Set, incrementoDecremento, Ternario }

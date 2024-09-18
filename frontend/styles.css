@@ -43,14 +43,26 @@ button:hover {
 
 textarea {
     width: 100%;
-    height: 100px;
+    height: 200px; /* Aumentar la altura */
     margin: 10px 0;
     padding: 10px;
     font-family: monospace;
 }
 
 #console {
-    height: 150px;
+    height: 200px; /* Aumentar la altura */
     background: #333;
     color: #0f0;
 }
+
+#reportConsole {
+    height: 200px; /* Altura para la nueva consola de reportes */
+    background: #222;
+    color: #ff0;
+}
+#errorConsole {
+    height: 200px; /* Altura para la nueva consola de errores */
+    background: #400;
+    color: #f88;
+}
+

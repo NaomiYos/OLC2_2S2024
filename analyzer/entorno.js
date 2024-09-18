@@ -1,4 +1,5 @@
 import { embebidas } from "./embebidas.js";
+
 export class Entorno {
 
     /**
@@ -7,11 +8,11 @@ export class Entorno {
     constructor(padre = undefined) {
         this.valores = {};
         this.padre = padre;
-
+        this.id = padre ? `${padre.id} -> Entorno` : 'Global';
         
         // funciones embebidas
         Object.entries(embebidas).forEach(([nombre, funcion]) => {
-            this.setOrUpdateVariable(nombre,{valor:funcion,tipo: "function"} );
+            this.setOrUpdateVariable(nombre,{valor:funcion,tipo: "object" } );
         });
     }
 
@@ -31,7 +32,7 @@ export class Entorno {
     /**
      * @param {string} nombre
      */
-    getVariable(nombre) {
+   /* getVariable(nombre) {
         const valorActual = this.valores[nombre];
 
         if (valorActual !== undefined) return valorActual;
@@ -41,7 +42,19 @@ export class Entorno {
         }
 
         throw new Error(`Variable ${nombre} no definida`);
-    }
+    }*/
+        getVariable(nombre) {
+            const valorActual = this.valores[nombre];
+        
+            if (valorActual !== undefined) return valorActual;
+        
+            if (this.padre) {
+                return this.padre.getVariable(nombre);
+            }
+        
+            throw new Error(`Variable ${nombre} no definida`);
+        }
+        
 
     /**
      * @param {string} nombre
@@ -68,12 +81,9 @@ export class Entorno {
         throw new Error(`Variable ${nombre} no definida`);
     }
     setOrUpdateVariable(nombre, valor) {
-        if (this.valores.hasOwnProperty(nombre)) {
+       
             console.log(`Actualizando variable ${nombre} con nuevo valor: ${valor}`);
             this.valores[nombre] = valor;
-        } else {
-            console.log(`Guardando nueva variable ${nombre} con valor: ${valor}`);
-            this.setVariable(nombre, valor);
-        }
+        
     }
 }

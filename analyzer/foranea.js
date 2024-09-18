@@ -28,35 +28,62 @@ export class FuncionForanea extends Invocable {
     /**
     * @type {Invocable['invocar']}
     */
-    invocar(interprete, args) {
+   /* invocar(interprete, args) {
         const entornoNuevo = new Entorno(this.clousure);
-
+    
         this.nodo.params.forEach((param, i) => {
-            entornoNuevo.set(param, args[i]);
+            console.log(`Setting parameter: ${JSON.stringify(param)}`);
+            entornoNuevo.setVariable(param.id, param.tipo, args[i].valor);
         });
-
+    
         const entornoAntesDeLaLlamada = interprete.entornoActual;
         interprete.entornoActual = entornoNuevo;
-
+    
         try {
             this.nodo.bloque.accept(interprete);
         } catch (error) {
             interprete.entornoActual = entornoAntesDeLaLlamada;
-
+    
             if (error instanceof ReturnException) {
-
-                // if(this.nodo.tipoRetorno !== error.value.tipo){
-                return error.value
+                return error.value;
             }
-
-            // TODO: manejar el resto de sentencias de control
+    
             throw error;
         }
-
+    
         interprete.entornoActual = entornoAntesDeLaLlamada;
-        return null
-    }
-
+        return null;
+    }*/
+        invocar(interprete, args) {
+            const entornoNuevo = new Entorno(this.clousure);
+        
+            this.nodo.params.forEach((param, i) => {
+                // Asumiendo que param es una cadena que representa el nombre del parámetro
+                const nombreParametro = param; // param es el nombre directamente
+                const tipoParametro = args[i].tipo; // Tipo del argumento pasado
+        
+                entornoNuevo.setVariable(nombreParametro, tipoParametro, args[i].valor);
+            });
+        
+            const entornoAntesDeLaLlamada = interprete.entornoActual;
+            interprete.entornoActual = entornoNuevo;
+        
+            try {
+                this.nodo.bloque.accept(interprete);
+            } catch (error) {
+                interprete.entornoActual = entornoAntesDeLaLlamada;
+        
+                if (error instanceof ReturnException) {
+                    return error.value;
+                }
+        
+                throw error;
+            }
+        
+            interprete.entornoActual = entornoAntesDeLaLlamada;
+            return null;
+        }
+        
     atar(instancia) {
         const entornoOculto = new Entorno(this.clousure);
         entornoOculto.set('this', instancia);
