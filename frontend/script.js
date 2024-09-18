@@ -1,5 +1,5 @@
-import { parse } from "/analyzer/analizador.js";
-import { InterpreterVisitor } from '/analyzer/interprete.js'
+import { parse } from "../analyzer/analizador.js";
+import { InterpreterVisitor } from '../analyzer/interprete.js'
 document.getElementById('createFileBtn').addEventListener('click', createFile);
 document.getElementById('fileInput').addEventListener('change', loadFile);
 document.getElementById('executeBtn').addEventListener('click', executeText);
